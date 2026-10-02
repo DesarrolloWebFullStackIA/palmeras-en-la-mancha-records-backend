@@ -4,9 +4,12 @@ from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.orm import Session
+from app.core.exceptions import register_exception_handlers
 
 from app.core.config import settings
 from app.core.database import Base, engine, get_db
+
+
 
 
 @asynccontextmanager
@@ -60,3 +63,5 @@ def root() -> dict:
         "health_url": "/health",
         "status": "online",
     }
+
+register_exception_handlers(app)
