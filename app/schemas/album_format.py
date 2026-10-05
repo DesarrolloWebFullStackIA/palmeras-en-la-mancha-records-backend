@@ -1,7 +1,6 @@
 from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
-
 from app.schemas.branch import BranchResponse
 from app.schemas.format import FormatResponse
 
