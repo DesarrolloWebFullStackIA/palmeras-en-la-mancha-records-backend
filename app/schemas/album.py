@@ -1,7 +1,6 @@
 from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
-
 from app.schemas.record_label import RecordLabelResponse
 
 # Shared catalog fields. label_id links each album to one record label.
