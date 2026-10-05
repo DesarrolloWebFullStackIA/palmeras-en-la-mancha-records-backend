@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, Field, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class RecordLabelBase(BaseModel):
@@ -12,30 +12,31 @@ class RecordLabelCreate(RecordLabelBase):
     name: str = Field(
         min_length=2,
         max_length=100
- 
     )
     country: str = Field(
         min_length=2,
         max_length=100
     )
     website: str | None = Field(
-        default=None, 
+        default=None,
         max_length=255
     )
 
+
 class RecordLabelUpdate(BaseModel):
     name: str | None = Field(
-        default=None, 
-        min_length=2, 
+        default=None,
+        min_length=2,
         max_length=100
     )
     country: str | None = Field(
-        default=None, 
-        min_length=2, 
+        default=None,
+        min_length=2,
         max_length=100
     )
-    website: str | None = Field( 
-        min_length=2, 
+    website: str | None = Field(
+        default=None,
+        min_length=2,
         max_length=255
     )
 
@@ -44,12 +45,13 @@ class RecordLabelResponse(RecordLabelBase):
     id: int = Field(
         gt=0
     )
-    name: str = str
-    country: str = str
+    name: str
+    country: str
     website: str | None = Field(
-        default=None, 
+        default=None,
         max_length=255
     )
+
     model_config = ConfigDict(
         from_attributes=True
     )
