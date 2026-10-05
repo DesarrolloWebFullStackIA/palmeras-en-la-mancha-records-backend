@@ -5,12 +5,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 from app.core.exceptions import register_exception_handlers
-
 from app.core.config import settings
-from app.core.database import Base, engine, get_db import app.models
+from app.core.database import Base, engine, get_db 
+import app.models
+from app.routers.albums import router as albums_router
 
-from fastapi import File, UploadFile
-from app.services.cloudinary_service import CloudinaryService
+
+
 
 
 
@@ -28,6 +29,10 @@ app = FastAPI(
     version=settings.VERSION,
     description="RESTful API for Palmeras en la Mancha Records music store.",
     lifespan=lifespan,
+)
+app.include_router(
+    albums_router,
+    prefix=settings.API_V1_STR,
 )
 
 # CORS Middleware configuration

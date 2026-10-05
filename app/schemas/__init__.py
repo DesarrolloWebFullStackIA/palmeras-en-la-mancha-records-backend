@@ -6,7 +6,7 @@ from .album_format import (
     AlbumFormatResponse,
     AlbumFormatUpdate,
 )
-from .branch import BranchBase, BranchCreate, BranchResponse, BranchUpdate
+from .branch import BranchCreate, BranchResponse, BranchUpdate
 from .format import FormatBase, FormatCreate, FormatResponse, FormatUpdate
 from .record_label import (
     RecordLabelBase,
