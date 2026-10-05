@@ -41,3 +41,42 @@ class Album(Base):
     album_formats: Mapped[list["AlbumFormat"]] = relationship(
         "AlbumFormat", back_populates="album", cascade="all, delete-orphan"
     )
+
+@router.put("/{album_id}")
+async def update_album_endpoint(
+    album_id: int,
+    title: str | None = Form(None),
+    artist: str | None = Form(None),
+    release_year: int | None = Form(None),
+    label_id: int | None = Form(None),
+    genre: str | None = Form(None),
+    image: UploadFile | None = File(None),
+    db: Session = Depends(get_db),
+):
+    album = db.query(Album).filter(Album.id == album_id).first()
+
+    if album is None:
+        raise HTTPException(status_code=404, detail="Album not found")
+
+    image_url = None
+
+    if image:
+        cloudinary_service = CloudinaryService()
+        image_url = await cloudinary_service.upload_image(image)
+
+    from app.schemas.album import AlbumUpdate
+
+    album_data = AlbumUpdate(
+        title=title,
+        artist=artist,
+        release_year=release_year,
+        genre=genre,
+        label_id=label_id,
+    )
+
+    return await update_album(
+        db=db,
+        album=album,
+        album_data=album_data,
+        image_url=image_url,
+    )
