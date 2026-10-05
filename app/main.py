@@ -7,9 +7,11 @@ from sqlalchemy.orm import Session
 from app.core.exceptions import register_exception_handlers
 
 from app.core.config import settings
-from app.core.database import Base, engine, get_db
+from app.core.database import Base, engine, get_db import app.models
 
-import app.models  # noqa: F401 — registers the 5 tables in Base.metadata
+from fastapi import File, UploadFile
+from app.services.cloudinary_service import CloudinaryService
+
 
 
 
