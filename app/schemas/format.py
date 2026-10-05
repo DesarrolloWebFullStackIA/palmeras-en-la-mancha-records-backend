@@ -1,31 +1,28 @@
-from pydantic import BaseModel, ConfigDict, Field, ConfigDict,StrictInt, StrictStr
+from typing import Optional
+
+from pydantic import BaseModel, ConfigDict
+
+# Shared fields for physical formats (Vinyl, CD, Cassette).
 
 
-class FormatCreate(BaseModel):
-    name: StrictStr = Field(
-        min_length=2,
-        max_length=100
-    )
-    description: StrictStr | None = Field(
-        default=None,
-        max_length=255
-    )
-
-class FormatUpdate(BaseModel):
-    name: StrictStr | None = Field(
-        default=None,
-        min_length=2,
-        max_length=100
-    )
-    description: StrictStr | None = Field(
-        default=None,
-        max_length=255
-    )
+class FormatBase(BaseModel):
+    name: str
+    description: Optional[str] = None
 
 
-class FormatResponse(BaseModel):
-    id: StrictInt
-    name: StrictStr
-    description: StrictStr | None = None
-    
+# Payload to register a new format. Name is required.
+class FormatCreate(FormatBase):
+    name: str
+
+
+# Payload to edit a format. All fields optional for partial updates.
+class FormatUpdate(FormatBase):
+    name: Optional[str] = None
+    description: Optional[str] = None
+
+
+# API response. Reads directly from SQLAlchemy models.
+class FormatResponse(FormatBase):
+    id: int
+
     model_config = ConfigDict(from_attributes=True)
