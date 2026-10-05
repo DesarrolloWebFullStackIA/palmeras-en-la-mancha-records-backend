@@ -6,7 +6,8 @@ class BranchCreate(BaseModel):
 		min_length=2,
     max_length=100
   )
-	address: str = Field(
+	address: str | None = Field(
+    default=None,
     min_length=5,
     max_length=255
   )
@@ -35,7 +36,7 @@ class BranchResponse(BaseModel):
 
 	id: int
 	name: str 
-	address: str 
+	address: str | None = None
 	phone: str | None = None
 
 	model_config = ConfigDict(from_attributes=True)
