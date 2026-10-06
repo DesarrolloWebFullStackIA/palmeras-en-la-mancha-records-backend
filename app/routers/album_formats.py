@@ -25,4 +25,18 @@ def create_new_album_format(
     album_format_data: AlbumFormatCreate,
     db: Session = Depends(get_db)
 ):
+    return controller.create_format(db=db, book_data=album_format_data)
+
+@router.post(
+    "/",
+    response_model=AlbumFormatResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Create a new album format",
+    description="Creates a new album format in the inventory.",
+) 
+
+def create_new_album_format(
+    album_format_data: AlbumFormatCreate,
+    db: Session = Depends(get_db)
+):
     return controller.create_book(db=db, album_format_data=album_format_data)

@@ -19,13 +19,12 @@ def get_all(db:session,skip:int = 0, limit: int = 100)->List[album_format]:
 
 
 
-def create_book(db: session, book_data: Album_FormatCreate) -> album_format:
+def create_format(db: session, book_data: Album_FormatCreate) -> album_format:
 
 
-    new_album_format = album_format(
-        title=book_data.title,
-        recipes_id=book_data.recipes_id,
-        ingredients=book_data.ingredients,
+    new_album_format = Album_FormatCreate(
+        nome=book_data.nome,
+        description=book_data.description,
         is_available=book_data.is_available,
     )
      
