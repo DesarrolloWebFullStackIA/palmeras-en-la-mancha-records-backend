@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey, UniqueConstraint
+from sqlalchemy import CheckConstraint, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -9,10 +9,18 @@ from app.core.database import Base
 class AlbumFormat(Base):
     __tablename__ = "album_formats"
 
-    # Composite unique rule: no duplicate edition in the same branch.
     __table_args__ = (
-        UniqueConstraint("album_id", "format_id", "branch_id", name="uq_album_format_branch"),
-    )
+    UniqueConstraint(
+        "album_id",
+        "format_id",
+        "branch_id",
+        name="uq_album_format_branch",
+    ),
+    CheckConstraint(
+        "stock >= 0",
+        name="ck_album_formats_stock_non_negative",
+    ),
+)
 
     # Primary key, auto-incremented integer.
     id: Mapped[int] = mapped_column(primary_key=True)

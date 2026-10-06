@@ -43,6 +43,7 @@ async def create_album_endpoint(
         album_data=album_data,
         image_url=image_url,
     )
+
 @router.put("/{album_id}")
 async def update_album_endpoint(
     album_id: int,
