@@ -10,17 +10,21 @@ class AlbumFormat(Base):
     __tablename__ = "album_formats"
 
     __table_args__ = (
-    UniqueConstraint(
-        "album_id",
-        "format_id",
-        "branch_id",
-        name="uq_album_format_branch",
-    ),
-    CheckConstraint(
-        "stock >= 0",
-        name="ck_album_formats_stock_non_negative",
-    ),
-)
+        UniqueConstraint(
+            "album_id",
+            "format_id",
+            "branch_id",
+            name="uq_album_format_branch",
+        ),
+        CheckConstraint(
+            "price >= 0",
+            name="ck_album_formats_price_non_negative",
+        ),
+        CheckConstraint(
+            "stock >= 0",
+            name="ck_album_formats_stock_non_negative",
+        ),
+    )
 
     # Primary key, auto-incremented integer.
     id: Mapped[int] = mapped_column(primary_key=True)
