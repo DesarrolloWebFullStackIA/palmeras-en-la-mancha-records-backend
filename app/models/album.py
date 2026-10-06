@@ -41,3 +41,4 @@ class Album(Base):
     album_formats: Mapped[list["AlbumFormat"]] = relationship(
         "AlbumFormat", back_populates="album", cascade="all, delete-orphan"
     )
+
