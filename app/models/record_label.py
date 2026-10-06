@@ -12,8 +12,8 @@ class RecordLabel(Base):
     # Primary key, auto-incremented integer.
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    # Label name, required field.
-    name: Mapped[str] = mapped_column(String(120), nullable=False)
+    # Label name, required and indexed for text search.
+    name: Mapped[str] = mapped_column(String(120), nullable=False, index=True)
 
     # Country of origin, optional field.
     country: Mapped[str | None] = mapped_column(String(60), nullable=True)

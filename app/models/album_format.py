@@ -29,19 +29,19 @@ class AlbumFormat(Base):
     # Primary key, auto-incremented integer.
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    # Link to albums.id. Deleted if the album is deleted.
+    # Link to albums.id. Indexed to speed up inventory joins.
     album_id: Mapped[int] = mapped_column(
-        ForeignKey("albums.id", ondelete="CASCADE"), nullable=False
+        ForeignKey("albums.id", ondelete="CASCADE"), nullable=False, index=True
     )
 
-    # Link to formats.id. Deleted if the format is deleted.
+    # Link to formats.id. Indexed to speed up format filters.
     format_id: Mapped[int] = mapped_column(
-        ForeignKey("formats.id", ondelete="CASCADE"), nullable=False
+        ForeignKey("formats.id", ondelete="CASCADE"), nullable=False, index=True
     )
 
-    # Link to branches.id. Deleted if the branch is deleted.
+    # Link to branches.id. Indexed to speed up branch filters.
     branch_id: Mapped[int] = mapped_column(
-        ForeignKey("branches.id", ondelete="CASCADE"), nullable=False
+        ForeignKey("branches.id", ondelete="CASCADE"), nullable=False, index=True
     )
 
     # Sale price, required field.

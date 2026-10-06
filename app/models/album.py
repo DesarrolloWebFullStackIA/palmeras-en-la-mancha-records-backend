@@ -12,11 +12,11 @@ class Album(Base):
     # Primary key, auto-incremented integer.
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    # Album title, required field.
-    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    # Album title, required and indexed for text search and ordering.
+    title: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
 
-    # Artist name, required field.
-    artist: Mapped[str] = mapped_column(String(160), nullable=False)
+    # Artist name, required and indexed for text search.
+    artist: Mapped[str] = mapped_column(String(160), nullable=False, index=True)
 
     # Release year, required field.
     release_year: Mapped[int] = mapped_column(nullable=False)
@@ -27,9 +27,9 @@ class Album(Base):
     # Public URL returned by Cloudinary, optional field.
     cover_image_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
-    # Foreign key to record_labels.id. Links each album to one label.
+    # Foreign key to record_labels.id. Indexed to speed up label joins.
     label_id: Mapped[int] = mapped_column(
-        ForeignKey("record_labels.id", ondelete="CASCADE"), nullable=False
+        ForeignKey("record_labels.id", ondelete="CASCADE"), nullable=False, index=True
     )
 
     # Many-to-one side: each album belongs to one label.
