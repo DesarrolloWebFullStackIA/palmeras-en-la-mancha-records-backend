@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session, selectinload
 
 from app.models.album import Album

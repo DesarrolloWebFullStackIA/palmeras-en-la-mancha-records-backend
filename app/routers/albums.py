@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
+from app.controller import album_controller
 from app.core.database import get_db
-
-from app.schemas.album import AlbumCreate, AlbumResponse
+from typing import Optional, List
+from app.schemas.album import AlbumBase, AlbumCreate, AlbumResponse, AlbumUpdate
 from app.controller import album_controller as controller
 
 
@@ -177,3 +178,39 @@ async def update_album_endpoint(
         album_data=album_data,
         image_url=image_url,
     )
+
+@router.get("/", response_model=List[AlbumBase])
+def get_all_albums(
+    db: Session = Depends(get_db),
+    include_relations: bool = Query(True, description="Incluye record_label, branch y formats para pintar tarjetas")
+):
+    return album_controller.get_all(db, include_relations=include_relations)
+
+@router.get("/{id}", response_model=AlbumResponse)
+def get_album(
+    id: int,
+    db: Session = Depends(get_db),
+    include_relations: bool = Query(True, description="Incluye relaciones para vista detalle")
+):
+    album = album_controller.get_by_id(db, id, include_relations=include_relations)
+    if not album:
+        raise HTTPException(status_code=404, detail="Album not found")
+    return album
+
+@router.post("/", response_model=AlbumResponse)
+def create_album(album: AlbumCreate, db: Session = Depends(get_db)):
+    return album_controller.create(db, album)
+
+@router.put("/{id}", response_model=AlbumResponse)
+def update_album(id: int, album: AlbumUpdate, db: Session = Depends(get_db)):
+    updated = album_controller.update(db, id, album)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Album not found")
+    return updated
+
+@router.delete("/{id}")
+def delete_album(id: int, db: Session = Depends(get_db)):
+    ok = album_controller.delete(db, id)
+    if not ok:
+        raise HTTPException(status_code=404, detail="Album not found")
+    return {"message": "Album deleted successfully"}
