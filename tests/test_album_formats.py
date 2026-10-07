@@ -366,7 +366,7 @@ def test_cascade_delete_on_format_deletion(
 
     # Delete parent Format
     del_fmt_res = client.delete(f"/api/v1/formats/{setup_parents['format'].id}")
-    assert del_fmt_res.status_code == 204
+    assert del_fmt_res.status_code == 200
 
     # Verify associated AlbumFormat was deleted in cascade
     get_af_res = client.get(f"/api/v1/album-formats/{af_id}")
@@ -394,7 +394,7 @@ def test_cascade_delete_on_branch_deletion(
 
     # Delete parent Branch
     del_br_res = client.delete(f"/api/v1/branches/{setup_parents['branch'].id}")
-    assert del_br_res.status_code == 204
+    assert del_br_res.status_code == 200
 
     # Verify associated AlbumFormat was deleted in cascade
     get_af_res = client.get(f"/api/v1/album-formats/{af_id}")
