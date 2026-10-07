@@ -6,13 +6,14 @@ from .album_format import (
     AlbumFormatResponse,
     AlbumFormatUpdate,
 )
-from .branch import BranchCreate, BranchResponse, BranchUpdate
-from .format import FormatCreate, FormatResponse, FormatUpdate
+from .branch import BranchCreate, BranchResponse, BranchUpdate, BranchWithAlbumsResponse
+from .format import FormatCreate, FormatResponse, FormatUpdate, FormatWithAlbumsResponse
 from .record_label import (
     RecordLabelBase,
     RecordLabelCreate,
     RecordLabelResponse,
     RecordLabelUpdate,
+    RecordLabelWithAlbumsResponse,
 )
 
 __all__ = [
@@ -20,12 +21,15 @@ __all__ = [
     "RecordLabelCreate",
     "RecordLabelUpdate",
     "RecordLabelResponse",
+    "RecordLabelWithAlbumsResponse",
     "FormatCreate",
     "FormatUpdate",
     "FormatResponse",
+    "FormatWithAlbumsResponse",
     "BranchCreate",
     "BranchUpdate",
     "BranchResponse",
+    "BranchWithAlbumsResponse",
     "AlbumBase",
     "AlbumCreate",
     "AlbumUpdate",

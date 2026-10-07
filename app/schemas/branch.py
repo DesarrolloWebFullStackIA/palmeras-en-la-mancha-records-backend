@@ -1,5 +1,7 @@
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.schemas.common import AlbumSummary
+
 
 class BranchCreate(BaseModel):
 	name: str = Field(
@@ -40,3 +42,8 @@ class BranchResponse(BaseModel):
 	phone: str | None = None
 
 	model_config = ConfigDict(from_attributes=True)
+
+
+# Response used when the client requests the albums stocked in this branch.
+class BranchWithAlbumsResponse(BranchResponse):
+	albums: list[AlbumSummary] = []

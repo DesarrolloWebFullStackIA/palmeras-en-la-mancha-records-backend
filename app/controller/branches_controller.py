@@ -1,14 +1,34 @@
 from fastapi import HTTPException, status
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
+from app.models.album import Album
 from app.models.branch import Branch
 from app.schemas.branch import BranchCreate, BranchUpdate
 
 
-def get_all(db: Session, skip: int = 0, limit: int = 100) -> list[Branch]:
+def get_all(
+    db: Session,
+    skip: int = 0,
+    limit: int = 100,
+    include_albums: bool = False,
+    record_label_id: int | None = None,
+) -> list[Branch]:
     try:
-        return db.query(Branch).offset(skip).limit(limit).all()
+        query = db.query(Branch)
+
+        # Keep only branches stocking at least one album of the given label.
+        if record_label_id is not None:
+            query = (
+                query.join(Branch.albums)
+                .filter(Album.label_id == record_label_id)
+                .distinct()
+            )
+
+        if include_albums:
+            query = query.options(selectinload(Branch.albums))
+
+        return query.offset(skip).limit(limit).all()
     except SQLAlchemyError as error:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -16,9 +36,16 @@ def get_all(db: Session, skip: int = 0, limit: int = 100) -> list[Branch]:
         )
 
 
-def get_by_id(db: Session, branch_id: int) -> Branch | None:
+def get_by_id(
+    db: Session,
+    branch_id: int,
+    include_albums: bool = False,
+) -> Branch | None:
     try:
-        return db.get(Branch, branch_id)
+        query = db.query(Branch).filter(Branch.id == branch_id)
+        if include_albums:
+            query = query.options(selectinload(Branch.albums))
+        return query.first()
     except SQLAlchemyError as error:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

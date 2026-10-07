@@ -1,5 +1,7 @@
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.schemas.common import AlbumSummary
+
 
 class RecordLabelBase(BaseModel):
     name: str = Field(
@@ -55,3 +57,8 @@ class RecordLabelResponse(RecordLabelBase):
     model_config = ConfigDict(
         from_attributes=True
     )
+
+
+# Response used when the client requests the nested albums of the label.
+class RecordLabelWithAlbumsResponse(RecordLabelResponse):
+    albums: list[AlbumSummary] = []

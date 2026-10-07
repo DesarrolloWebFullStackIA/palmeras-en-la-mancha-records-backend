@@ -1,14 +1,36 @@
 from fastapi import HTTPException, status
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
+from app.models.album import Album
+from app.models.album_format import AlbumFormat
 from app.models.record_label import RecordLabel
 from app.schemas.record_label import RecordLabelCreate, RecordLabelUpdate
 
 
-def get_all(db: Session, skip: int = 0, limit: int = 100) -> list[RecordLabel]:
+def get_all(
+    db: Session,
+    skip: int = 0,
+    limit: int = 100,
+    include_albums: bool = False,
+    branch_id: int | None = None,
+) -> list[RecordLabel]:
     try:
-        return db.query(RecordLabel).offset(skip).limit(limit).all()
+        query = db.query(RecordLabel)
+
+        # Keep only labels with at least one album stocked in the given branch.
+        if branch_id is not None:
+            query = (
+                query.join(RecordLabel.albums)
+                .join(Album.album_formats)
+                .filter(AlbumFormat.branch_id == branch_id)
+                .distinct()
+            )
+
+        if include_albums:
+            query = query.options(selectinload(RecordLabel.albums))
+
+        return query.offset(skip).limit(limit).all()
     except SQLAlchemyError as error:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -16,9 +38,16 @@ def get_all(db: Session, skip: int = 0, limit: int = 100) -> list[RecordLabel]:
         )
 
 
-def get_by_id(db: Session, record_label_id: int) -> RecordLabel | None:
+def get_by_id(
+    db: Session,
+    record_label_id: int,
+    include_albums: bool = False,
+) -> RecordLabel | None:
     try:
-        return db.get(RecordLabel, record_label_id)
+        query = db.query(RecordLabel).filter(RecordLabel.id == record_label_id)
+        if include_albums:
+            query = query.options(selectinload(RecordLabel.albums))
+        return query.first()
     except SQLAlchemyError as error:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

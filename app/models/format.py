@@ -22,3 +22,8 @@ class Format(Base):
     album_formats: Mapped[list["AlbumFormat"]] = relationship(
         "AlbumFormat", back_populates="format", cascade="all, delete-orphan"
     )
+
+    # Many-to-many shortcut to every album sold in this format (read-only).
+    albums: Mapped[list["Album"]] = relationship(
+        "Album", secondary="album_formats", viewonly=True
+    )

@@ -25,3 +25,8 @@ class Branch(Base):
     album_formats: Mapped[list["AlbumFormat"]] = relationship(
         "AlbumFormat", back_populates="branch", cascade="all, delete-orphan"
     )
+
+    # Many-to-many shortcut to every album stocked in this branch (read-only).
+    albums: Mapped[list["Album"]] = relationship(
+        "Album", secondary="album_formats", viewonly=True
+    )

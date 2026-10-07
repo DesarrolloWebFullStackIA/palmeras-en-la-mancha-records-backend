@@ -1,14 +1,34 @@
 from fastapi import HTTPException, status
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
+from app.models.album import Album
 from app.models.format import Format
 from app.schemas.format import FormatCreate, FormatUpdate
 
 
-def get_all(db: Session, skip: int = 0, limit: int = 100) -> list[Format]:
+def get_all(
+    db: Session,
+    skip: int = 0,
+    limit: int = 100,
+    include_albums: bool = False,
+    record_label_id: int | None = None,
+) -> list[Format]:
     try:
-        return db.query(Format).offset(skip).limit(limit).all()
+        query = db.query(Format)
+
+        # Keep only formats used by at least one album of the given label.
+        if record_label_id is not None:
+            query = (
+                query.join(Format.albums)
+                .filter(Album.label_id == record_label_id)
+                .distinct()
+            )
+
+        if include_albums:
+            query = query.options(selectinload(Format.albums))
+
+        return query.offset(skip).limit(limit).all()
     except SQLAlchemyError as error:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -16,9 +36,16 @@ def get_all(db: Session, skip: int = 0, limit: int = 100) -> list[Format]:
         )
 
 
-def get_by_id(db: Session, format_id: int) -> Format | None:
+def get_by_id(
+    db: Session,
+    format_id: int,
+    include_albums: bool = False,
+) -> Format | None:
     try:
-        return db.get(Format, format_id)
+        query = db.query(Format).filter(Format.id == format_id)
+        if include_albums:
+            query = query.options(selectinload(Format.albums))
+        return query.first()
     except SQLAlchemyError as error:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

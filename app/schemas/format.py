@@ -1,5 +1,7 @@
 from pydantic import BaseModel, ConfigDict, Field, ConfigDict,StrictInt, StrictStr
 
+from app.schemas.common import AlbumSummary
+
 
 class FormatCreate(BaseModel):
     name: StrictStr = Field(
@@ -29,3 +31,8 @@ class FormatResponse(BaseModel):
     description: StrictStr | None = None
     
     model_config = ConfigDict(from_attributes=True)
+
+
+# Response used when the client requests the albums sold in this format.
+class FormatWithAlbumsResponse(FormatResponse):
+    albums: list[AlbumSummary] = []
