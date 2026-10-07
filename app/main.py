@@ -31,14 +31,16 @@ app.include_router(
     prefix=settings.API_V1_STR,
 )
 app.include_router(
-    record_labels.router
-)
-
-app.include_router(
-    formats.router
+    record_labels.router,
+    prefix=settings.API_V1_STR,
 )
 app.include_router(
-    branches.router
+    formats.router,
+    prefix=settings.API_V1_STR,
+)
+app.include_router(
+    branches.router,
+    prefix=settings.API_V1_STR,
 )
 
 # CORS Middleware configuration

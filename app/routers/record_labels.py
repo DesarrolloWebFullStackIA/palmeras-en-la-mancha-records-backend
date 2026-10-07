@@ -1,16 +1,16 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.controller import record_labels_controller
 from app.schemas.record_label import RecordLabelCreate, RecordLabelResponse, RecordLabelUpdate
 
-router = APIRouter(prefix="/record_labels", tags=["record_labels"])
+router = APIRouter(prefix="/record-labels", tags=["Record Labels"])
 
 @router.get("/", response_model=list[RecordLabelResponse])
 def get_all_record_labels(db: Session = Depends(get_db)):
     return record_labels_controller.get_all(db)
 
-@router.post("/", response_model=RecordLabelResponse)
+@router.post("/", response_model=RecordLabelResponse, status_code=status.HTTP_201_CREATED)
 def create_record_label(record_label: RecordLabelCreate, db: Session = Depends(get_db)):
     return record_labels_controller.create(db, record_label)
 
@@ -28,9 +28,9 @@ def update_record_label(id: int, record_label: RecordLabelUpdate, db: Session = 
         raise HTTPException(status_code=404, detail="Record label not found")
     return rl
 
-@router.delete("/{id}")
+@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_record_label(id: int, db: Session = Depends(get_db)):
     ok = record_labels_controller.delete(db, id)
     if not ok:
         raise HTTPException(status_code=404, detail="Record label not found")
-    return {"message": "Record label deleted successfully"}
+    return None

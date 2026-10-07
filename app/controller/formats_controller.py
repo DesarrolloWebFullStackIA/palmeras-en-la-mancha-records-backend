@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.models.format import Format
@@ -36,6 +36,9 @@ def create(db: Session, format_data: FormatCreate) -> Format:
         db.commit()
         db.refresh(new_format)
         return new_format
+    except IntegrityError:
+        db.rollback()
+        raise
     except SQLAlchemyError as error:
         db.rollback()
         raise HTTPException(
@@ -56,6 +59,9 @@ def update(db: Session, format_id: int, format_data: FormatUpdate) -> Format | N
         db.commit()
         db.refresh(existing_format)
         return existing_format
+    except IntegrityError:
+        db.rollback()
+        raise
     except SQLAlchemyError as error:
         db.rollback()
         raise HTTPException(
