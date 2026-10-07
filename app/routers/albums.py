@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
-from database.database import get_db
+from app.core.database import get_db
 
-from schemas.album import AlbumCreate, AlbumResponse
-from controller import album_controller as controller
+from app.schemas.album import AlbumCreate, AlbumResponse
+from app.controller import album_controller as controller
 
 
 router = APIRouter(

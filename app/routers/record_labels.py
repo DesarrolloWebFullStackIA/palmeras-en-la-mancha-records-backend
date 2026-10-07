@@ -1,47 +1,36 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status
-from typing import List
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from app.core.database import get_db
+from app.controller import record_labels_controller
+from app.schemas.record_label import RecordLabelCreate, RecordLabelResponse, RecordLabelUpdate
 
-from database.database import get_db
-from schemas.record_label import RecordlabelsCreate, RecordLabelsResponse
-from controller import book_controller as controller
+router = APIRouter(prefix="/record_labels", tags=["record_labels"])
 
+@router.get("/", response_model=list[RecordLabelResponse])
+def get_all_record_labels(db: Session = Depends(get_db)):
+    return record_labels_controller.get_all(db)
 
-router = APIRouter(
-    prefix="/record_labels",
-    tags=["record_label"],
-)
+@router.post("/", response_model=RecordLabelResponse)
+def create_record_label(record_label: RecordLabelCreate, db: Session = Depends(get_db)):
+    return record_labels_controller.create(db, record_label)
 
+@router.get("/{id}", response_model=RecordLabelResponse)
+def get_record_label(id: int, db: Session = Depends(get_db)):
+    rl = record_labels_controller.get_by_id(db, id)
+    if not rl:
+        raise HTTPException(status_code=404, detail="Record label not found")
+    return rl
 
-@router.get(
-    "/", 
-    response_model=List[RecordLabelsResponse],
-    status_code=status.HTTP_200_OK,
-    summary="Retrieve all record labels",
-    description="Fetches a list of all record labels in the inventory.",
-)
+@router.put("/{id}", response_model=RecordLabelResponse)
+def update_record_label(id: int, record_label: RecordLabelUpdate, db: Session = Depends(get_db)):
+    rl = record_labels_controller.update(db, id, record_label)
+    if not rl:
+        raise HTTPException(status_code=404, detail="Record label not found")
+    return rl
 
-def get_all_record_labels(
-    record_label_data: RecordlabelsCreate,
-    db: Session = Depends(get_db)
-):
-    return controller.create_book(db=db, record_label_data=record_label_data)
-
-def create_new_record_label(
-    record_label_data: RecordlabelsCreate,
-    db: Session = Depends(get_db)
-):
-    return controller.create_record_label(db=db, record_label_data=record_label_data)
-
-@router.post(
-    "/",
-    response_model=RecordLabelsResponse,
-    status_code=status.HTTP_201_CREATED,
-    summary="Create a new record label",
-    description="Creates a new record label in the inventory.",
-)
-def create_new_record_label(
-    record_label_data: RecordlabelsCreate,
-    db: Session = Depends(get_db)
-):
-    return controller.create_book(db=db, record_label_data=record_label_data)
+@router.delete("/{id}")
+def delete_record_label(id: int, db: Session = Depends(get_db)):
+    ok = record_labels_controller.delete(db, id)
+    if not ok:
+        raise HTTPException(status_code=404, detail="Record label not found")
+    return {"message": "Record label deleted successfully"}

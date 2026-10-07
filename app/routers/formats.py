@@ -1,39 +1,36 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from app.core.database import get_db
+from app.controller import formats_controller
+from app.schemas.format import FormatCreate, FormatResponse, FormatUpdate
 
-from database.database import get_db
-from app.schemas.format import FormatCreate, FormatResponse
-from app.controller import book_controller as controller
+router = APIRouter(prefix="/formats", tags=["formats"])
 
+@router.get("/", response_model=list[FormatResponse])
+def get_all_formats(db: Session = Depends(get_db)):
+    return formats_controller.get_all(db)
 
-router = APIRouter(
-    prefix="/Formats",
-    tags=["format"],
-)
+@router.post("/", response_model=FormatResponse)
+def create_format(format: FormatCreate, db: Session = Depends(get_db)):
+    return formats_controller.create(db, format)
 
+@router.get("/{id}", response_model=FormatResponse)
+def get_format(id: int, db: Session = Depends(get_db)):
+    f = formats_controller.get_by_id(db, id)
+    if not f:
+        raise HTTPException(status_code=404, detail="Format not found")
+    return f
 
-@router.get(
-    "/", 
-    response_model=list[FormatResponse],
-    status_code=status.HTTP_200_OK,
-    summary="Retrieve all formats",
-    description="Fetches a list of all formats in the inventory.",
-)
+@router.put("/{id}", response_model=FormatResponse)
+def update_format(id: int, format: FormatUpdate, db: Session = Depends(get_db)):
+    f = formats_controller.update(db, id, format)
+    if not f:
+        raise HTTPException(status_code=404, detail="Format not found")
+    return f
 
-def get_all_formats(
-    db: Session = Depends(get_db)
-):
-    return controller.get_all_books(db=db)
-
-@router.post(
-    "/",
-    response_model=FormatResponse,
-    status_code=status.HTTP_201_CREATED,
-    summary="Create a new format",
-    description="Creates a new format in the inventory.",
-)
-def create_new_format(
-    format_data: FormatCreate,
-    db: Session = Depends(get_db)
-):
-    return controller.create_book(db=db, book_data=format_data)
+@router.delete("/{id}")
+def delete_format(id: int, db: Session = Depends(get_db)):
+    ok = formats_controller.delete(db, id)
+    if not ok:
+        raise HTTPException(status_code=404, detail="Format not found")
+    return {"message": "Format deleted successfully"}

@@ -7,12 +7,8 @@ from sqlalchemy.orm import Session
 from app.core.exceptions import register_exception_handlers
 from app.core.config import settings
 from app.core.database import Base, engine, get_db 
-import app.models
+from app.routers import record_labels, formats, branches
 from app.routers.albums import router as albums_router
-
-
-
-
 
 
 
@@ -33,6 +29,16 @@ app = FastAPI(
 app.include_router(
     albums_router,
     prefix=settings.API_V1_STR,
+)
+app.include_router(
+    record_labels.router
+)
+
+app.include_router(
+    formats.router
+)
+app.include_router(
+    branches.router
 )
 
 # CORS Middleware configuration
