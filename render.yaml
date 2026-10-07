@@ -11,6 +11,10 @@ services:
         fromDatabase:
           name: palmeras-records-db
           property: connectionString
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: ENVIRONMENT
+        value: production
 
 databases:
   - name: palmeras-records-db
