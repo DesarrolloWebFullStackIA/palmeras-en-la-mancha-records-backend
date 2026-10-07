@@ -9,7 +9,7 @@ from app.core.config import settings
 from app.core.database import Base, engine, get_db 
 from app.routers import record_labels, formats, branches, album_formats
 from app.routers.albums import router as albums_router
-
+from app.routers import record_labels, formats, branches, health
 
 
 
@@ -46,8 +46,10 @@ app.include_router(
     album_formats.router,
     prefix=settings.API_V1_STR,
 )
+app.include_router(
+    health.router
+)
 
-# CORS Middleware configuration
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.BACKEND_CORS_ORIGINS,
