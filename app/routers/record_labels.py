@@ -13,7 +13,7 @@ from app.schemas.record_label import (
     RecordLabelWithAlbumsResponse,
 )
 
-router = APIRouter(prefix="/record_labels", tags=["record_labels"])
+router = APIRouter(prefix="/record-labels", tags=["Record Labels"])
 
 
 def _dump(record_label: RecordLabel, include_albums: bool = False) -> dict:

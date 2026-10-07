@@ -13,7 +13,7 @@ from app.schemas.format import (
     FormatWithAlbumsResponse,
 )
 
-router = APIRouter(prefix="/formats", tags=["formats"])
+router = APIRouter(prefix="/formats", tags=["Formats"])
 
 
 def _dump(format_record: Format, include_albums: bool = False) -> dict:

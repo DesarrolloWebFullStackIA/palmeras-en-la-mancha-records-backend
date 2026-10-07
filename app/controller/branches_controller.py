@@ -1,6 +1,11 @@
 from fastapi import HTTPException, status
+<<<<<<< HEAD
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, selectinload
+=======
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from sqlalchemy.orm import Session
+>>>>>>> 6feef1e5a4c9f86f32c70008f9d4f658015a9872
 
 from app.models.album import Album
 from app.models.branch import Branch
@@ -64,6 +69,9 @@ def create(db: Session, branch_data: BranchCreate) -> Branch:
         db.commit()
         db.refresh(new_branch)
         return new_branch
+    except IntegrityError:
+        db.rollback()
+        raise
     except SQLAlchemyError as error:
         db.rollback()
         raise HTTPException(
@@ -84,6 +92,9 @@ def update(db: Session, branch_id: int, branch_data: BranchUpdate) -> Branch | N
         db.commit()
         db.refresh(existing_branch)
         return existing_branch
+    except IntegrityError:
+        db.rollback()
+        raise
     except SQLAlchemyError as error:
         db.rollback()
         raise HTTPException(

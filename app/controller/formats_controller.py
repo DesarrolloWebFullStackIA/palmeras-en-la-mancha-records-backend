@@ -1,6 +1,11 @@
 from fastapi import HTTPException, status
+<<<<<<< HEAD
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, selectinload
+=======
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from sqlalchemy.orm import Session
+>>>>>>> 6feef1e5a4c9f86f32c70008f9d4f658015a9872
 
 from app.models.album import Album
 from app.models.format import Format
@@ -63,6 +68,9 @@ def create(db: Session, format_data: FormatCreate) -> Format:
         db.commit()
         db.refresh(new_format)
         return new_format
+    except IntegrityError:
+        db.rollback()
+        raise
     except SQLAlchemyError as error:
         db.rollback()
         raise HTTPException(
@@ -83,6 +91,9 @@ def update(db: Session, format_id: int, format_data: FormatUpdate) -> Format | N
         db.commit()
         db.refresh(existing_format)
         return existing_format
+    except IntegrityError:
+        db.rollback()
+        raise
     except SQLAlchemyError as error:
         db.rollback()
         raise HTTPException(

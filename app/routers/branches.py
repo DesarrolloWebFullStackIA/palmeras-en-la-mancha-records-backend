@@ -13,7 +13,7 @@ from app.schemas.branch import (
     BranchWithAlbumsResponse,
 )
 
-router = APIRouter(prefix="/branches", tags=["branches"])
+router = APIRouter(prefix="/branches", tags=["Branches"])
 
 
 def _dump(branch: Branch, include_albums: bool = False) -> dict:
