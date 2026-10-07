@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.core.exceptions import register_exception_handlers
 from app.core.config import settings
 from app.core.database import Base, engine, get_db 
-from app.routers import record_labels, formats, branches
+from app.routers import record_labels, formats, branches, album_formats
 from app.routers.albums import router as albums_router
 
 
@@ -40,6 +40,10 @@ app.include_router(
 )
 app.include_router(
     branches.router,
+    prefix=settings.API_V1_STR,
+)
+app.include_router(
+    album_formats.router,
     prefix=settings.API_V1_STR,
 )
 
