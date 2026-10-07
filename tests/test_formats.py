@@ -1,102 +1,10 @@
-<<<<<<< HEAD
+from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
+
 from app.models.album import Album
 from app.models.album_format import AlbumFormat
 from app.models.branch import Branch
 from app.models.format import Format
-
-
-def test_list_formats_empty(client):
-    response = client.get("/formats/")
-
-    assert response.status_code == 200
-    assert response.json() == []
-
-
-def test_create_format(client):
-    response = client.post(
-        "/formats/",
-        json={"name": "Vinyl", "description": "12-inch records"},
-    )
-
-    assert response.status_code == 201
-    body = response.json()
-    assert body["name"] == "Vinyl"
-    assert body["description"] == "12-inch records"
-    assert body["albums"] == []
-
-
-def test_get_update_delete_format(client):
-    created = client.post("/formats/", json={"name": "CD"}).json()
-
-    fetched = client.get(f"/formats/{created['id']}")
-    assert fetched.status_code == 200
-    assert fetched.json()["id"] == created["id"]
-
-    updated = client.put(
-        f"/formats/{created['id']}",
-        json={"description": "Compact disc"},
-    )
-    assert updated.status_code == 200
-    assert updated.json()["description"] == "Compact disc"
-    assert updated.json()["name"] == "CD"
-
-    deleted = client.delete(f"/formats/{created['id']}")
-    assert deleted.status_code == 200
-
-    missing = client.get(f"/formats/{created['id']}")
-    assert missing.status_code == 404
-
-
-def test_include_albums_and_label_filter(client, db_session):
-    label_response = client.post(
-        "/record_labels/",
-        json={"name": "Blue Note", "country": "United States"},
-    )
-    label_id = label_response.json()["id"]
-
-    branch = Branch(
-        name="Palmeras Madrid",
-        address="Calle Mayor 1",
-        phone="910000001",
-    )
-    vinyl = Format(name="Vinyl")
-    db_session.add_all([branch, vinyl])
-    db_session.flush()
-
-    album = Album(
-        title="Kind of Blue",
-        artist="Miles Davis",
-        release_year=1959,
-        label_id=label_id,
-    )
-    db_session.add(album)
-    db_session.flush()
-
-    db_session.add(
-        AlbumFormat(
-            album_id=album.id,
-            format_id=vinyl.id,
-            branch_id=branch.id,
-            price=25.5,
-            stock=5,
-        )
-    )
-    db_session.commit()
-
-    plain = client.get("/formats/").json()
-    assert plain[0]["albums"] == []
-
-    nested = client.get("/formats/?include_albums=true").json()
-    assert [a["title"] for a in nested[0]["albums"]] == ["Kind of Blue"]
-
-    matching = client.get(f"/formats/?record_label_id={label_id}").json()
-    assert [fmt["id"] for fmt in matching] == [vinyl.id]
-
-    without_albums = client.get("/formats/?record_label_id=99999").json()
-    assert without_albums == []
-=======
-import pytest
-from fastapi.testclient import TestClient
 
 
 def test_create_format_success(client: TestClient) -> None:
@@ -261,7 +169,7 @@ def test_update_format_duplicate_name_error(client: TestClient) -> None:
 
 
 def test_delete_format_success(client: TestClient) -> None:
-    """Test deleting a format returns 204 No Content.
+    """Test deleting a format returns 200 OK.
 
     Assigned developer: Dev5 (TASK-10)
     """
@@ -273,8 +181,8 @@ def test_delete_format_success(client: TestClient) -> None:
 
     delete_res = client.delete(f"/api/v1/formats/{format_id}")
 
-    assert delete_res.status_code == 204
-    assert delete_res.content == b""
+    assert delete_res.status_code == 200
+    assert delete_res.json()["message"] == "Format deleted successfully"
 
     # Verify format no longer exists
     get_res = client.get(f"/api/v1/formats/{format_id}")
@@ -290,4 +198,53 @@ def test_delete_format_not_found(client: TestClient) -> None:
 
     assert response.status_code == 404
     assert response.json()["detail"] == "Format not found"
->>>>>>> 6feef1e5a4c9f86f32c70008f9d4f658015a9872
+
+
+def test_include_albums_and_label_filter(client: TestClient, db_session: Session) -> None:
+    """Test retrieving formats with nested albums and filtering by record label ID."""
+    label_response = client.post(
+        "/api/v1/record-labels/",
+        json={"name": "Blue Note", "country": "United States"},
+    )
+    label_id = label_response.json()["id"]
+
+    branch = Branch(
+        name="Palmeras Madrid",
+        address="Calle Mayor 1",
+        phone="910000001",
+    )
+    vinyl = Format(name="Vinyl")
+    db_session.add_all([branch, vinyl])
+    db_session.flush()
+
+    album = Album(
+        title="Kind of Blue",
+        artist="Miles Davis",
+        release_year=1959,
+        label_id=label_id,
+    )
+    db_session.add(album)
+    db_session.flush()
+
+    db_session.add(
+        AlbumFormat(
+            album_id=album.id,
+            format_id=vinyl.id,
+            branch_id=branch.id,
+            price=25.5,
+            stock=5,
+        )
+    )
+    db_session.commit()
+
+    plain = client.get("/api/v1/formats/").json()
+    assert plain[0]["albums"] == []
+
+    nested = client.get("/api/v1/formats/?include_albums=true").json()
+    assert [a["title"] for a in nested[0]["albums"]] == ["Kind of Blue"]
+
+    matching = client.get(f"/api/v1/formats/?record_label_id={label_id}").json()
+    assert [fmt["id"] for fmt in matching] == [vinyl.id]
+
+    without_albums = client.get("/api/v1/formats/?record_label_id=99999").json()
+    assert without_albums == []
