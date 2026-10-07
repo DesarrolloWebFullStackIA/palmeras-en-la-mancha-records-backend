@@ -1,16 +1,58 @@
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile, status
 from sqlalchemy.orm import Session
 
-from app.controller.album_controller import create_album, update_album
+from app.controller import album_controller
 from app.core.database import get_db
 from app.models.album import Album
-from app.schemas.album import AlbumCreate, AlbumUpdate
+from app.schemas.album import AlbumCreate, AlbumResponse, AlbumUpdate
+from app.schemas.album_filters import AlbumFilters, album_filter_parameters
 from app.services.cloudinary_service import CloudinaryService
 
 router = APIRouter(
     prefix="/albums",
     tags=["Albums"],
 )
+
+
+@router.get(
+    "/",
+    response_model=list[AlbumResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Search and filter catalog albums",
+    description="Retrieve albums with optional dynamic filtering by title, artist, label, format, and branch.",
+)
+def get_all_albums(
+    filters: AlbumFilters = Depends(album_filter_parameters),
+    skip: int = Query(0, ge=0, description="Pagination offset"),
+    limit: int = Query(100, ge=1, le=100, description="Pagination limit"),
+    db: Session = Depends(get_db),
+):
+    return album_controller.get_filtered_albums(
+        db=db,
+        filters=filters,
+        skip=skip,
+        limit=limit,
+    )
+
+
+@router.get(
+    "/{album_id}",
+    response_model=AlbumResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get an album by ID",
+    description="Retrieve album details including its associated record label.",
+)
+def get_album(
+    album_id: int,
+    db: Session = Depends(get_db),
+):
+    album = album_controller.get_album_by_id(db=db, album_id=album_id)
+    if album is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Album not found",
+        )
+    return album
 
 
 @router.post("/")
@@ -37,7 +79,7 @@ async def create_album_endpoint(
         label_id=label_id,
     )
 
-    return await create_album(
+    return await album_controller.create_album(
         db=db,
         album_data=album_data,
         image_url=image_url,
@@ -74,7 +116,7 @@ async def update_album_endpoint(
         label_id=label_id,
     )
 
-    return await update_album(
+    return await album_controller.update_album(
         db=db,
         album=album,
         album_data=album_data,
