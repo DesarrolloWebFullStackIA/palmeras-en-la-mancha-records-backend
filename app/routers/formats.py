@@ -1,16 +1,16 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.controller import formats_controller
 from app.schemas.format import FormatCreate, FormatResponse, FormatUpdate
 
-router = APIRouter(prefix="/formats", tags=["formats"])
+router = APIRouter(prefix="/formats", tags=["Formats"])
 
 @router.get("/", response_model=list[FormatResponse])
 def get_all_formats(db: Session = Depends(get_db)):
     return formats_controller.get_all(db)
 
-@router.post("/", response_model=FormatResponse)
+@router.post("/", response_model=FormatResponse, status_code=status.HTTP_201_CREATED)
 def create_format(format: FormatCreate, db: Session = Depends(get_db)):
     return formats_controller.create(db, format)
 
@@ -28,9 +28,9 @@ def update_format(id: int, format: FormatUpdate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Format not found")
     return f
 
-@router.delete("/{id}")
+@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_format(id: int, db: Session = Depends(get_db)):
     ok = formats_controller.delete(db, id)
     if not ok:
         raise HTTPException(status_code=404, detail="Format not found")
-    return {"message": "Format deleted successfully"}
+    return None

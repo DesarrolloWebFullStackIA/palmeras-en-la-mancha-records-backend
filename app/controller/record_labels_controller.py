@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.models.record_label import RecordLabel
@@ -37,6 +37,9 @@ def create(db: Session, record_label_data: RecordLabelCreate) -> RecordLabel:
         db.commit()
         db.refresh(new_record_label)
         return new_record_label
+    except IntegrityError:
+        db.rollback()
+        raise
     except SQLAlchemyError as error:
         db.rollback()
         raise HTTPException(
@@ -61,6 +64,9 @@ def update(
         db.commit()
         db.refresh(record_label)
         return record_label
+    except IntegrityError:
+        db.rollback()
+        raise
     except SQLAlchemyError as error:
         db.rollback()
         raise HTTPException(
