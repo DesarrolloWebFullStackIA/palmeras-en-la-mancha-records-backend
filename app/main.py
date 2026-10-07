@@ -1,16 +1,14 @@
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
-from fastapi import Depends, FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import text
-from sqlalchemy.orm import Session
-from app.core.exceptions import register_exception_handlers
-from app.core.config import settings
-from app.core.database import Base, engine, get_db 
-from app.routers import record_labels, formats, branches, album_formats
-from app.routers.albums import router as albums_router
-from app.routers import record_labels, formats, branches, health
 
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.core.config import settings
+from app.core.database import Base, engine
+from app.core.exceptions import register_exception_handlers
+from app.routers import album_formats, branches, formats, health, record_labels
+from app.routers.albums import router as albums_router
 
 
 @asynccontextmanager
@@ -26,30 +24,18 @@ app = FastAPI(
     description="RESTful API for Palmeras en la Mancha Records music store.",
     lifespan=lifespan,
 )
-app.include_router(
-    albums_router,
-    prefix=settings.API_V1_STR,
-)
-app.include_router(
-    record_labels.router,
-    prefix=settings.API_V1_STR,
-)
-app.include_router(
-    formats.router,
-    prefix=settings.API_V1_STR,
-)
-app.include_router(
-    branches.router,
-    prefix=settings.API_V1_STR,
-)
-app.include_router(
-    album_formats.router,
-    prefix=settings.API_V1_STR,
-)
-app.include_router(
-    health.router
-)
 
+# Mount feature routers under API v1 prefix
+app.include_router(albums_router, prefix=settings.API_V1_STR)
+app.include_router(record_labels.router, prefix=settings.API_V1_STR)
+app.include_router(formats.router, prefix=settings.API_V1_STR)
+app.include_router(branches.router, prefix=settings.API_V1_STR)
+app.include_router(album_formats.router, prefix=settings.API_V1_STR)
+
+# Mount system diagnostic router
+app.include_router(health.router)
+
+# Configure CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.BACKEND_CORS_ORIGINS,
@@ -59,26 +45,9 @@ app.add_middleware(
 )
 
 
-@app.get("/health", tags=["Diagnostics"], summary="System health check")
-def health_check(db: Session = Depends(get_db)) -> dict:
-    """Diagnostic health check verifying API uptime and database connectivity."""
-    try:
-        db.execute(text("SELECT 1"))
-        db_status = "connected"
-    except Exception as exc:
-        db_status = f"unhealthy: {str(exc)}"
-
-    return {
-        "status": "healthy" if db_status == "connected" else "degraded",
-        "database": db_status,
-        "environment": settings.ENVIRONMENT,
-        "version": settings.VERSION,
-    }
-
-
 @app.get("/", tags=["Root"], summary="API root status")
 def root() -> dict:
-    """Root status endpoint providing documentation references."""
+    """Root status endpoint providing documentation and health references."""
     return {
         "project": settings.PROJECT_NAME,
         "version": settings.VERSION,
@@ -86,5 +55,6 @@ def root() -> dict:
         "health_url": "/health",
         "status": "online",
     }
+
 
 register_exception_handlers(app)

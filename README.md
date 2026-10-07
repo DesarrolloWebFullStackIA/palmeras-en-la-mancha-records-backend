@@ -116,8 +116,6 @@ erDiagram
 ```text
 palmeras-en-la-mancha-records-backend/
 ├── app/
-│   ├── api/
-│   │   └── openapi_metadata.py     # OpenAPI tag descriptions and swagger metadata
 │   ├── controller/
 │   │   ├── album_controller.py     # Dynamic search engine and album business logic
 │   │   ├── album_formats_controller.py # Inventory junction queries and validations
