@@ -39,10 +39,35 @@ class Settings(BaseSettings):
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
     def assemble_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
-        """Parse comma-separated origin strings into a list."""
+        """Parse comma-separated origin strings into a list and normalize origins."""
+        from urllib.parse import urlparse
+
+        raw_items: List[str]
         if isinstance(v, str):
-            return [origin.strip() for origin in v.split(",") if origin.strip()]
-        return v
+            raw_items = [origin.strip() for origin in v.split(",") if origin.strip()]
+        elif isinstance(v, list):
+            raw_items = [str(origin).strip() for origin in v if str(origin).strip()]
+        else:
+            return []
+
+        origins: List[str] = []
+        for origin in raw_items:
+            if origin == "*":
+                if "*" not in origins:
+                    origins.append("*")
+                continue
+
+            parsed = urlparse(origin)
+            if parsed.scheme and parsed.netloc:
+                normalized = f"{parsed.scheme}://{parsed.netloc}"
+                if normalized not in origins:
+                    origins.append(normalized)
+            else:
+                clean = origin.rstrip("/")
+                if clean not in origins:
+                    origins.append(clean)
+
+        return origins
 
     model_config = SettingsConfigDict(
         env_file=".env",
