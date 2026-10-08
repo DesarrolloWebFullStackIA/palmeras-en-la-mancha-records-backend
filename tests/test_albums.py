@@ -229,3 +229,32 @@ def test_update_album_not_found(client: TestClient) -> None:
     assert response.status_code == 404
     payload = response.json()
     assert payload["detail"] == "Album not found"
+
+
+def test_delete_album_success(client: TestClient, sample_label: RecordLabel) -> None:
+    """Test deleting an album removes it and returns 200 OK."""
+    album_data = {
+        "title": "In Utero",
+        "artist": "Nirvana",
+        "release_year": 1993,
+        "genre": "Grunge",
+        "label_id": sample_label.id,
+    }
+    create_res = client.post("/api/v1/albums/", data=album_data)
+    assert create_res.status_code == 200
+    album_id = create_res.json()["id"]
+
+    delete_res = client.delete(f"/api/v1/albums/{album_id}")
+    assert delete_res.status_code == 200
+    assert delete_res.json()["message"] == "Album deleted successfully"
+
+    get_res = client.get(f"/api/v1/albums/{album_id}")
+    assert get_res.status_code == 404
+
+
+def test_delete_album_not_found(client: TestClient) -> None:
+    """Test deleting a non-existent album returns 404 Not Found."""
+    response = client.delete("/api/v1/albums/99999")
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Album not found"
+
