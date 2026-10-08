@@ -122,3 +122,23 @@ async def update_album_endpoint(
         album_data=album_data,
         image_url=image_url,
     )
+
+
+@router.delete(
+    "/{album_id}",
+    status_code=status.HTTP_200_OK,
+    summary="Delete an album by ID",
+    description="Delete an album and its associated editions.",
+)
+def delete_album_endpoint(
+    album_id: int,
+    db: Session = Depends(get_db),
+):
+    deleted = album_controller.delete_album(db=db, album_id=album_id)
+    if not deleted:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Album not found",
+        )
+    return {"message": "Album deleted successfully"}
+

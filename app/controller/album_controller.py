@@ -135,3 +135,19 @@ async def update_album(
     db.refresh(album)
 
     return album
+
+
+def delete_album(db: Session, album_id: int) -> bool:
+    """Delete an album by ID. Cascade deletion automatically removes associated editions."""
+    album = db.query(Album).filter(Album.id == album_id).first()
+    if not album:
+        return False
+
+    try:
+        db.delete(album)
+        db.commit()
+        return True
+    except Exception:
+        db.rollback()
+        raise
+
